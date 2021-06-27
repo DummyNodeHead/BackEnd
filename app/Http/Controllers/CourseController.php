@@ -38,7 +38,12 @@ class CourseController extends Controller
         $query = "select course.ID as ID, course.name as cname,credit, type, teacher.name as tname, day, time from course,teacher where course.teacher_ID=teacher.ID";
         $classes = DB::select($query);
         return $classes;
-
+    }
+    
+    public function getDistinct(){
+        $query = "select distinct course.ID as ID, course.name as cname,credit, type, teacher.name as tname, day, time from course,teacher where course.teacher_ID=teacher.ID";
+        $classes = DB::select($query);
+        return $classes;
     }
 
     public function chooseCourse($stu_id, $cid){
@@ -47,9 +52,39 @@ class CourseController extends Controller
         $query.="' and Course_id=";
         $query.=$cid;
         $q = DB::select($query);
+
+        $course_to_test=DB::table("course")->where('ID','=',$cid)->get();
+        if(count($course_to_test) == 0){
+            return ;
+        }
+
+        $time = $course_to_test[0]->time;
+        $day = $course_to_test[0]->day;
+        $test_query = "select * from course_select,course where course_select.Course_id = course.ID and Student_id='";
+        $test_query.=$stu_id;
+        $test_query.="'";
+        $all_selected_courses=DB::select($test_query);
+        
+        for ($i=0; $i<count($all_selected_courses); $i++) {
+            $tmp = $all_selected_courses[$i];
+            if($tmp->time == $time && $tmp->day == $day){
+                return "Time_Conflict";
+            }
+        } 
+        $course_to_sel=DB::table("course")->where('ID','=',$cid)->get();
+        if($course_to_sel[0]->selected >= $course_to_sel[0]->total){
+            return "No_remain"; // If the course is full
+        }
+
         if(count($q) == 0){
-        $bool=DB::insert("insert into course_select(Student_id, Course_id, IsSelected) values(?,?,?)",[$stu_id,$cid,0]);
-        return $bool;
+
+            $bool=DB::insert("insert into course_select(Student_id, Course_id, IsSelected) values(?,?,?)",[$stu_id,$cid,0]);
+            if($bool){
+                $remainder=DB::update('update course set selected=selected+1 where ID=? ',[$cid]);
+                return "Success";
+
+            }
+            return $bool;
         }
         return $q;
 
@@ -69,7 +104,7 @@ class CourseController extends Controller
     }
 
     public function getPlanByID($stu_id){
-        $query = "select course.ID as ID, course.name as cname,credit, type, teacher.name as tname, day, time 
+        $query = "select course.ID as ID, course.name as cname,credit, type, teacher.name as tname, day, time, total, selected
         from course,teacher,training_program 
         where course.teacher_ID=teacher.ID and training_program.Course_id=course.ID and training_program.Student_id='";
         $query.=$stu_id;
@@ -80,6 +115,10 @@ class CourseController extends Controller
 
     public function delCourse($stu_id, $cid){
         $num=DB::delete('delete from course_select where Student_id= ? and Course_id=?',[$stu_id,$cid]);
+        if($num == 1){
+            $remainder=DB::update('update course set selected=selected-1 where ID=? ',[$cid]);
+        }
+
         return $num;
     }
 
