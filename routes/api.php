@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,7 +38,7 @@ Route::apiResource('updatepsw','UpdatepswController')->middleware(\App\Http\Midd
 Route::apiResource('getinformation','GetinforController')->middleware(\App\Http\Middleware\CrossHttp::class);
 
 use \App\Http\Middleware\CrossHttp;
-
+use \App\Http\Middleware\EnableCrossRequest;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -66,7 +65,50 @@ Route::apiResource('changeStu','ChangerStuInformController')->middleware(CrossHt
 Route::apiResource('changeTea','ChangerTeaInformController')->middleware(CrossHttp::class);
 Route::apiResource('changeMan','ChangeManInformController')->middleware(CrossHttp::class);
 Route::apiResource('BatchInput','UploadController')->middleware(CrossHttp::class);
-Route::apiResource('UpPhoto','UpPhotoController')->middleware(CrossHttp::class);
+Route::apiResource('UpPhotoTea','UpPhotoTeaController')->middleware(CrossHttp::class);
+Route::apiResource('UpPhotoStu','UpPhotoStuController')->middleware(CrossHttp::class);
+Route::apiResource('UpPhotoMan','UpPhotoManController')->middleware(CrossHttp::class);
+
+
+
+
+use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\SourceController;
+use App\Http\Controllers\TSourceController;
+use App\Http\Controllers\CourseController;
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+//get
+Route::get('/Assignment',[AssignmentController::class,'showAssignment']);
+Route::get('/HWanalysis',[AssignmentController::class,'showAssignmentScore']);
+Route::get('/THWanalysis',[AssignmentController::class,'showStudentAssignmentScore']);
+Route::get('/HWMarking',[AssignmentController::class,'showStudentAssignment']);
+Route::get('/getAssignmentID',[AssignmentController::class,'getAssignmentID']);
+
+Route::get('/Quiz',[QuizController::class, 'showQuiz']);
+Route::get('/Grade',[QuizController::class, 'showGrade']);
+Route::get('/Studentanalysis',[QuizController::class, 'showStudentAnalysisScore']);
+Route::get('/Quizanalysis',[QuizController::class, 'showQuizAnalysisScore']);
+Route::get('/TQuiz',[QuizController::class, 'showStudentQuiz']);
+//Route::get('/Analysischarts',[QuizController::class,'showAnalysisChart']);
+Route::get('/AllCourse',[CourseController::class, 'showAllCourse']);
+Route::get('/CourseResource',[TSourceController::class,'showCourseResource']);
+Route::get('/TCourseResource',[TSourceController::class,'showTeacherCourseResource']);
+
+Route::get('/PersonalResource',[SourceController::class,'showPersonalResource']);
+Route::get('/TPersonalResource',[SourceController::class,'showTeacherPersonalResource']);
+
+//post 
+Route::post('/addAssignment',[AssignmentController::class, 'store']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -101,8 +143,14 @@ Route::get('/searchStuById/{id}',function($id){
     $ret = (new App\Http\Controllers\ViewStudent)->viewStudent($id);
     return $ret;
 });
+
 Route::get('/getAllCourse',function(){
     $ret = (new App\Http\Controllers\CourseController)->getAll();
+    return $ret;
+});
+
+Route::get('/getDistinctCourse',function(){
+    $ret = (new App\Http\Controllers\CourseController)->getDistinct();
     return $ret;
 });
 
@@ -134,4 +182,14 @@ Route::get('/delCourse', function() {
 Route::get('/managerChooseCourse', function() {
     $ret = (new App\Http\Controllers\CourseController)->managerChooseCourse($_GET['stu'], $_GET['cid']);
     return $ret;
+});
+
+Route::get('/managerState', function() {
+    $ret = (new App\Http\Controllers\TimeManagementController)->set_state($_GET['state']);
+    return $ret;
+});
+
+Route::get('/getManageState', function() {
+    $ret = (new App\Http\Controllers\TimeManagementController)->get_state();
+    return $ret[0]->state;
 });

@@ -13,7 +13,16 @@ class ChangerTeaInformController extends BaseController
         $input=$request;
         $ID=$input['id'];
         $commu=$input['commu'];
-        Teacher::where('id', '=', $ID)->update(['commu' => $commu]);
-        return $this->create([$input['id']],'hfhg',200);
+        $v = Validator::make($commu, [
+            'commu' => 'required|max:30'
+        ]);
+        if ($v->fails())
+        {
+            return $this->create([$input['id']],'hfhg',200);
+        }
+        else 
+        {
+            Student::where('id', '=', $ID)->update(['commu' => $commu]);
+        }
     }
 }

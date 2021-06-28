@@ -13,8 +13,8 @@ class ChangerStuInformController extends BaseController
         $input=$request;
         $ID=$input['id'];
         $commu=$input['commu'];
+
         Student::where('id', '=', $ID)->update(['commu' => $commu]);
-        return $this->create([$input['id']],'hfhg',200);
     }
 }
 

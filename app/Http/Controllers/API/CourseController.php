@@ -48,8 +48,8 @@ class CourseController extends BaseController
         {
             return $this->create([],'参数错误',400);
         }
-        $data=Course::where('ID','=',$id)->get();
-        if(empty($data)||empty($datatc))
+        $data=Course::where('ID','=',$id);
+        if(empty($data))
         {
             return $this->create([],'不存在',300);
         }
@@ -92,7 +92,7 @@ class CourseController extends BaseController
         $data=Course::where('ID','=',$id);
         //Course::where('ID','=',$id)->delete();
         //$data=Course::find($id);
-        $datatc=tc::where('class_ID','=',$id);
+        $datatc=tc::where('course_ID','=',$id);
         if(empty($data)||empty($datatc))
         {
             return $this->create([],'不存在',300);
@@ -123,7 +123,7 @@ class CourseController extends BaseController
        {
             $dataa=$request->all();
             $tc=new tc;
-            $tc->class_ID=$dataa['ID'];
+            $tc->course_ID=$dataa['ID'];
             $tc->teacher_ID=$dataa['teacher_ID'];
             //$tc->save();
             $addData=Course::create($data);

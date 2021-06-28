@@ -25,7 +25,7 @@ class UpdatepswController extends BaseController
         }
         else if($input['newpsw']!=$input['confirmpsw'])
         {
-            return $this->create([],'确认密码有误',200);
+            return $this->create([],'确认密码有误',400);
         }
         else
         {

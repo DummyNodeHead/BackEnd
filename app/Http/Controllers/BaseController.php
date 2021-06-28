@@ -19,4 +19,20 @@ class BaseController extends Controller
 
         return response($result,$code);
     }
+    public function success($data): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'code' => '0',
+            'data' => $data,
+        ]);
+    }
+
+    //错误返回
+    public function fail($code, $data): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'code' => $code,
+            'data' => $data,
+        ]);
+    }
 }
